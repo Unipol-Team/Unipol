@@ -1,12 +1,33 @@
+# app/main.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
+from app.routers import policies, users   
 
+# 테이블 자동 생성 (없으면 만들어줌)
+Base.metadata.create_all(bind=engine)
+
+# FastAPI 앱 생성
 app = FastAPI(
-    title="Unipol API",
-    description="대학생 맞춤 지원 정책 추천 서비스",
+    title="온통청년 청년정책 API",
+    description="청년정책 검색 및 조회 서비스",
     version="1.0.0"
 )
 
-@app.get("/")
-def root():
-    return {"message": "Unipol API 서버가 실행 중입니다."}
+# CORS 설정 (프론트엔드에서 API 호출 허용)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # 나중에 프론트 주소로 변경
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# 라우터 연결 (나중에 추가)
+app.include_router(policies.router) 
+app.include_router(users.router)
+
+# 서버 상태 확인용
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "Youth Policy API is running"}
