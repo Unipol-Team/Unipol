@@ -18,14 +18,13 @@ Unipol/
 ├── frontend/          # 프론트엔드
 ├── backend/           # 백엔드
 │   ├── app/
-│   │   ├── api/       # API 라우터
-│   │   ├── models/    # DB 모델
-│   │   ├── schemas/   # Pydantic 스키마
 │   │   ├── core/      # 설정, 보안
+│   │   ├── routers/   # API 라우터
+│   │   ├── services/  # 비즈니스 로직
 │   │   ├── main.py    # 앱 진입점
-│   │   └── database.py# DB 연결
-│   ├── requirements.txt
-│   └── .env
+│   │   ├── database.py# DB 연결
+│   │   └── models.py  # DB 모델
+│   └── requirements.txt
 └── docs/              # 설계 문서
 ```
 
