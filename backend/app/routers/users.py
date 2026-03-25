@@ -8,6 +8,7 @@ from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from fastapi.security import OAuth2PasswordBearer
 import os
 
 load_dotenv()
@@ -17,6 +18,7 @@ ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 router = APIRouter(
     prefix="/users",
@@ -99,7 +101,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
 # 내 정보 조회
 @router.get("/me")
-def get_me(token: str, db: Session = Depends(get_db)):
+def get_me(token: str = Depends(oauth2_scheme) , db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = int(payload.get("sub"))
@@ -111,6 +113,43 @@ def get_me(token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
 
     return {
+        "id": user.id,
+        "email": user.email,
+        "nickname": user.nickname,
+        "birth_year": user.birth_year,
+        "region_name": user.region_name
+    }
+    
+# 내 정보 수정
+class UpdateRequest(BaseModel):
+    nickname: str = None
+    birth_year: int = None
+    region_name: str = None
+
+@router.put("/me")
+def update_me(req: UpdateRequest, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload.get("sub"))
+    except Exception:
+        raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다")
+
+    user = db.query(User).filter_by(id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
+
+    if req.nickname is not None:
+        user.nickname = req.nickname
+    if req.birth_year is not None:
+        user.birth_year = req.birth_year
+    if req.region_name is not None:
+        user.region_name = req.region_name
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "정보가 수정되었습니다",
         "id": user.id,
         "email": user.email,
         "nickname": user.nickname,
