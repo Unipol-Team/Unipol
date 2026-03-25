@@ -45,6 +45,10 @@ def fetch_and_save():
             }
 
             response = requests.get(API_URL, params=params)
+            # 빈 응답이면 종료
+            if not response.text.strip():
+                print("더 이상 데이터가 없습니다.")
+                break
             data = response.json()
 
             # 2. 데이터 꺼내기
