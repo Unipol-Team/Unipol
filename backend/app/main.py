@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import policies, users   
+from app.routers import policies, users, bookmarks
 
 # 테이블 자동 생성 (없으면 만들어줌)
 Base.metadata.create_all(bind=engine)
@@ -26,6 +26,7 @@ app.add_middleware(
 # 라우터 연결 (나중에 추가)
 app.include_router(policies.router) 
 app.include_router(users.router)
+app.include_router(bookmarks.router)
 
 # 서버 상태 확인용
 @app.get("/")
