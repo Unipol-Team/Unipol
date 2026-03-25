@@ -60,6 +60,7 @@ class Policy(Base):
 
     # PolicyCategory 테이블과 연결
     category = relationship("PolicyCategory", back_populates="policies")
+    bookmarks = relationship("Bookmark", back_populates="policy")
 
 # 3. 사용자 테이블
 class User(Base):
@@ -75,5 +76,17 @@ class User(Base):
     is_active = Column(Boolean, default = True)
     created_at = Column(TIMESTAMP(timezone=True), server_default = func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default = func.now())
+    bookmarks = relationship("Bookmark", back_populates="user")
 
-    
+# 4. 북마크 테이블
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    policy_id = Column(Integer, ForeignKey("policy.id"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+
+    # 관계 설정
+    user = relationship("User", back_populates="bookmarks")
+    policy = relationship("Policy", back_populates="bookmarks")
