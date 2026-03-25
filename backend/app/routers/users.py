@@ -27,7 +27,7 @@ router = APIRouter(
 class RegisterRequest(BaseModel):
     email: str
     password: str
-    nickname: str = None
+    nickname: str 
     birth_year: int = None
     region_name: str = None
 
